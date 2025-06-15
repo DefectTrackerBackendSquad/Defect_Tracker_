@@ -1,0 +1,262 @@
+-- Step 1: Create the defect_tracker database
+CREATE DATABASE defect_tracker;
+
+-- Use the defect_tracker database
+USE defect_tracker;
+
+-- Step 2: Create Roles Table
+CREATE TABLE Roles (
+    role_id INT PRIMARY KEY AUTO_INCREMENT,
+    role_name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+-- Step 3: Create Privileges Table
+CREATE TABLE Privileges (
+    privilege_id INT PRIMARY KEY AUTO_INCREMENT,
+    privilege_name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+-- Step 4: Create Users Table
+CREATE TABLE Users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    role_id INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+);
+
+-- Step 5: Create Role_Privileges Table (Linking Roles and Privileges)
+CREATE TABLE Role_Privileges (
+    role_id INT,
+    privilege_id INT,
+    PRIMARY KEY (role_id, privilege_id),
+    FOREIGN KEY (role_id) REFERENCES Roles(role_id),
+    FOREIGN KEY (privilege_id) REFERENCES Privileges(privilege_id)
+);
+
+-- Step 6: Create User_Privileges Table (Custom Privileges for Users)
+CREATE TABLE User_Privileges (
+    user_id INT,
+    privilege_id INT,
+    assigned_by INT,
+    assigned_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, privilege_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (privilege_id) REFERENCES Privileges(privilege_id),
+    FOREIGN KEY (assigned_by) REFERENCES Users(user_id)
+);
+
+-- Step 7: Create Projects Table
+CREATE TABLE Projects (
+    project_id INT PRIMARY KEY AUTO_INCREMENT,
+    project_name VARCHAR(255) NOT NULL,
+    project_manager_id INT,
+    start_date DATETIME,
+    end_date DATETIME,
+    status VARCHAR(50),
+    FOREIGN KEY (project_manager_id) REFERENCES Users(user_id)
+);
+
+-- Step 8: Create Modules Table
+CREATE TABLE Modules (
+    module_id INT PRIMARY KEY AUTO_INCREMENT,
+    module_name VARCHAR(255) NOT NULL,
+    project_id INT,
+    description TEXT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES Projects(project_id)
+);
+
+-- Step 9: Create Submodules Table
+CREATE TABLE Submodules (
+    submodule_id INT PRIMARY KEY AUTO_INCREMENT,
+    submodule_name VARCHAR(255) NOT NULL,
+    module_id INT,
+    description TEXT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (module_id) REFERENCES Modules(module_id)
+);
+
+-- Step 10: Create Employees Table
+CREATE TABLE Employees (
+    employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    designation VARCHAR(255),
+    availability_hours INT,
+    availability_percentage INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Step 23: Create Bench Table
+CREATE TABLE Bench (
+    bench_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    availability_hours INT,
+    availability_percentage INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
+);
+
+
+-- Step 11: Create Employee_Project_Assignment Table
+CREATE TABLE Employee_Project_Assignment (
+    assignment_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    project_id INT,
+    bench_id INT,
+    assigned_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    availability_hours INT,
+    availability_percentage INT,
+    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id),
+    FOREIGN KEY (project_id) REFERENCES Projects(project_id),
+    FOREIGN KEY (bench_id) REFERENCES Bench(bench_id)
+);
+
+-- Step 12: Create Employee_Module_Assignment Table
+CREATE TABLE Employee_Module_Assignment (
+    assignment_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    module_id INT,
+    assigned_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    role_in_module VARCHAR(100),
+    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id),
+    FOREIGN KEY (module_id) REFERENCES Modules(module_id)
+);
+
+-- Step 13: Create Employee_Submodule_Assignment Table
+CREATE TABLE Employee_Submodule_Assignment (
+    assignment_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    submodule_id INT,
+    assigned_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    role_in_submodule VARCHAR(100),
+    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id),
+    FOREIGN KEY (submodule_id) REFERENCES Submodules(submodule_id)
+);
+
+-- Step 19: Create Test Case Status Table
+CREATE TABLE Test_Case_Status (
+    test_case_status_id INT PRIMARY KEY AUTO_INCREMENT,
+    test_case_status_name VARCHAR(50) NOT NULL,
+    description TEXT
+
+
+
+-- Step 14: Create TestCases Table
+CREATE TABLE TestCases (
+    test_case_id INT PRIMARY KEY AUTO_INCREMENT,
+    test_case_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    severity VARCHAR(50),
+    priority VARCHAR(50),
+    test_case_status_id INT,
+    assigned_to INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (assigned_to) REFERENCES Users(user_id),
+    FOREIGN KEY (test_case_status_id) REFERENCES Test_Case_Status(test_case_status_id)
+);
+
+-- Step 15: Create Severity Table
+CREATE TABLE Severity (
+    severity_id INT PRIMARY KEY AUTO_INCREMENT,
+    severity_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- Step 16: Create Priority Table
+CREATE TABLE Priority (
+    priority_id INT PRIMARY KEY AUTO_INCREMENT,
+    priority_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+-- Step 18: Create Defect Status Table
+CREATE TABLE Defect_Status (
+    defect_status_id INT PRIMARY KEY AUTO_INCREMENT,
+    defect_status_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- Step 17: Create Defects Table
+CREATE TABLE Defects (
+    defect_id INT PRIMARY KEY AUTO_INCREMENT,
+    test_case_id INT,
+    defect_title VARCHAR(255) NOT NULL,
+    description TEXT,
+    severity_id INT,
+    priority_id INT,
+    defect_status_id INT,
+    assigned_to INT,
+    reported_by INT,
+    reported_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fixed_by INT,
+    fix_date DATETIME,
+    resolution TEXT,
+    environment VARCHAR(255),
+    release_number VARCHAR(50),
+    module_id INT,
+    submodule_id INT,
+    comments TEXT,
+    attachments TEXT,
+    related_test_case INT,
+    reopen_count INT DEFAULT 0,
+    defect_type VARCHAR(50),
+    FOREIGN KEY (test_case_id) REFERENCES TestCases(test_case_id),
+    FOREIGN KEY (assigned_to) REFERENCES Users(user_id),
+    FOREIGN KEY (reported_by) REFERENCES Users(user_id),
+    FOREIGN KEY (fixed_by) REFERENCES Users(user_id),
+    FOREIGN KEY (severity_id) REFERENCES Severity(severity_id),
+    FOREIGN KEY (priority_id) REFERENCES Priority(priority_id),
+    FOREIGN KEY (defect_status_id) REFERENCES Defect_Status(defect_status_id),
+    FOREIGN KEY (module_id) REFERENCES Modules(module_id),
+    FOREIGN KEY (submodule_id) REFERENCES Submodules(submodule_id)
+);
+
+
+
+);
+
+-- Step 20: Create Release Table
+CREATE TABLE Release (
+    release_id INT PRIMARY KEY AUTO_INCREMENT,
+    release_number VARCHAR(50),
+    release_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50)
+);
+
+-- Step 21: Create ReleaseTestCases Table
+CREATE TABLE ReleaseTestCases (
+    test_case_id INT,
+    release_id INT,
+    status VARCHAR(50),
+    assigned_to INT,
+    test_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (test_case_id, release_id),
+    FOREIGN KEY (test_case_id) REFERENCES TestCases(test_case_id),
+    FOREIGN KEY (release_id) REFERENCES Release(release_id),
+    FOREIGN KEY (assigned_to) REFERENCES Users(user_id)
+);
+
+-- Step 22: Create Notifications Table
+CREATE TABLE Notifications (
+    notification_id INT PRIMARY KEY AUTO_INCREMENT,
+    defect_id INT,
+    user_id INT,
+    notification_type VARCHAR(50),
+    message TEXT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'Unread',
+    FOREIGN KEY (defect_id) REFERENCES Defects(defect_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
