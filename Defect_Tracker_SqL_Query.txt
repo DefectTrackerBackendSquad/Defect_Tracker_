@@ -259,4 +259,3 @@ CREATE TABLE Notifications (
     FOREIGN KEY (defect_id) REFERENCES Defects(defect_id),
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
-
